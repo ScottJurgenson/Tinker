@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from engine.player import Player
 from engine.character_card import CharacterCard
 from engine.card import Card
+import random
 
 
 @dataclass
@@ -58,41 +59,16 @@ class Game:
 
     def main_phase(self):
         print(f"{self.active_player.name} is in the Main phase.")
+        self.turn_over = False
 
-        # Ink the first inkable card, if possible
-        if self.active_player.can_ink():
-            for card in self.active_player.hand:
-                if card.inkable:
-                    self.active_player.ink_card(card)
-                    break
-
-        # Play the first affordable character
-        for card in self.active_player.hand:
-            if isinstance(card, CharacterCard) and card.cost <= (self.active_player.ink_pool - self.active_player.used_ink):
-                self.active_player.play_card(card)
-                break
-
-        # Quest with all ready characters
-        for char in self.active_player.board:
-            if char.is_dry and not char.exerted:
-                char.exerted = True
-                gained = char.lore or 0
-                self.active_player.lore += gained
-                print(f"{self.active_player.name} quests with {char.name} for {gained} lore!")
+        while not self.turn_over and not self.game_over:
+            actions = self.generate_legal_actions(self.active_player)
+            action = self.get_player_action(actions)
+            self.resolve_action(action)
 
         print(f"{self.active_player.name}'s board: {[char.name for char in self.active_player.board]}")
         print(f"Ink used: {self.active_player.used_ink} / {self.active_player.ink_pool}")
         print(f"Lore: {self.active_player.lore}")
-
-        # Try to play the first character card they can afford
-        for card in self.active_player.hand:
-            if isinstance(card, CharacterCard) and card.cost <= (self.active_player.ink_pool - self.active_player.used_ink):
-                self.active_player.play_card(card)
-                break
-
-        # Print current board state
-        print(f"{self.active_player.name}'s board: {[char.name for char in self.active_player.board]}")
-        print(f"Ink used: {self.active_player.used_ink} / {self.active_player.ink_pool}")
 
 
     def end_phase(self):
@@ -114,3 +90,51 @@ class Game:
 
     def swap_players(self):
         self.active_player, self.inactive_player = self.inactive_player, self.active_player
+
+    def generate_legal_actions(self, player):
+        actions = []
+
+        # Inkable cards in hand
+        if player.can_ink():
+            for card in player.hand:
+                if card.inkable:
+                    actions.append({"type": "ink", "card": card})
+
+        # Playable character cards
+        available_ink = player.ink_pool - player.used_ink
+        for card in player.hand:
+            if isinstance(card, CharacterCard) and card.cost <= available_ink:
+                actions.append({"type": "play", "card": card})
+
+        # Questable characters
+        for char in player.board:
+            if isinstance(char, CharacterCard) and char.is_dry and not char.exerted:
+                actions.append({"type": "quest", "card": char})
+
+        # End turn is always allowed
+        actions.append({"type": "end_turn"})
+
+        return actions
+
+    def get_player_action(self, actions):
+        action = random.choice(actions)
+        print(f"Randomly selected action: {action['type']} {action.get('card', {}).name if 'card' in action else ''}")
+        return action
+
+    def resolve_action(self, action):
+        player = self.active_player
+
+        if action["type"] == "ink":
+            player.ink_card(action["card"])
+
+        elif action["type"] == "play":
+            player.play_card(action["card"])
+
+        elif action["type"] == "quest":
+            char = action["card"]
+            char.exerted = True
+            player.lore += char.lore or 0
+            print(f"{player.name} quests with {char.name} for {char.lore} lore!")
+
+        elif action["type"] == "end_turn":
+            self.turn_over = True
