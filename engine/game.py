@@ -183,8 +183,8 @@ class Game:
             print(board_line(card))
 
         print(f"\n🪙 Ink:")
-        print(f"  {active.name}: {active.used_ink}/{active.ink_pool}")
-        print(f"  {opponent.name}: {opponent.used_ink}/{opponent.ink_pool}")
+        print(f"  {active.name}: {active.ink_pool - active.used_ink}/{active.ink_pool}")
+        print(f"  {opponent.name}: {opponent.ink_pool - opponent.used_ink}/{opponent.ink_pool}")
 
         print(f"\n✨ Lore:")
         print(f"  {active.name}: {active.lore}")
