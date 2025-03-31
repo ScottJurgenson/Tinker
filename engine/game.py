@@ -40,6 +40,7 @@ class Game:
             self.turn_number += 1
 
     def ready_phase(self):
+        self.active_player.reset_for_new_turn()
         for character in self.active_player.board:
             character.is_dry = True
             character.exerted = False
@@ -74,7 +75,6 @@ class Game:
 
     def end_phase(self):
         self.resolve_end_of_turn_banishments(self.active_player)
-        self.active_player.reset_for_new_turn()
         print(f"{self.active_player.name}'s turn ends.")
 
     def check_win_condition(self):
@@ -184,7 +184,7 @@ class Game:
 
         print(f"\n🪙 Ink:")
         print(f"  {active.name}: {active.used_ink}/{active.ink_pool}")
-        print(f"  {opponent.name}: ???/{opponent.ink_pool}")
+        print(f"  {opponent.name}: {opponent.used_ink}/{opponent.ink_pool}")
 
         print(f"\n✨ Lore:")
         print(f"  {active.name}: {active.lore}")
