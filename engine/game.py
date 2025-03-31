@@ -62,6 +62,7 @@ class Game:
         self.turn_over = False
 
         while not self.turn_over and not self.game_over:
+            self.display_full_game_state()
             actions = self.generate_legal_actions(self.active_player)
             action = self.get_player_action(actions)
             self.resolve_action(action)
@@ -138,3 +139,54 @@ class Game:
 
         elif action["type"] == "end_turn":
             self.turn_over = True
+
+    def display_full_game_state(self):
+        p1 = self.player1
+        p2 = self.player2
+        active = self.active_player
+        opponent = self.inactive_player
+
+        print(f"\n📜 === TURN {self.turn_number} === 📜")
+        print(f"🎮 {active.name}'s Turn")
+        print("-" * 40)
+
+        print(f"🖐️ {active.name}'s Hand:")
+        for idx, card in enumerate(active.hand, 1):
+            print(f"  {idx}. {card}")
+
+        print(f"\n🧠 {opponent.name}'s Hand: {len(opponent.hand)} cards")
+
+        print(f"\n🗃️ Deck Sizes:")
+        print(f"  {active.name}: {len(active.deck)} cards")
+        print(f"  {opponent.name}: {len(opponent.deck)} cards")
+
+        print(f"\n💀 Discard Piles:")
+        print(f"  {active.name}: {[card.name for card in active.discard]}")
+        print(f"  {opponent.name}: {[card.name for card in opponent.discard]}")
+
+        def board_line(card):
+            status = []
+            if card.exerted:
+                status.append("Exerted")
+            if not getattr(card, "is_dry", True):
+                status.append("Wet")
+            if getattr(card, "damage", 0) > 0:
+                status.append(f"{card.damage} dmg")
+            return f"  {card.name} [{', '.join(status) or 'Ready'}]"
+
+        print(f"\n🧱 Board - {active.name}:")
+        for card in active.board:
+            print(board_line(card))
+
+        print(f"\n🧱 Board - {opponent.name}:")
+        for card in opponent.board:
+            print(board_line(card))
+
+        print(f"\n🪙 Ink:")
+        print(f"  {active.name}: {active.used_ink}/{active.ink_pool}")
+        print(f"  {opponent.name}: ???/{opponent.ink_pool}")
+
+        print(f"\n✨ Lore:")
+        print(f"  {active.name}: {active.lore}")
+        print(f"  {opponent.name}: {opponent.lore}")
+        print("-" * 40)

@@ -3,6 +3,10 @@ from engine.character_card import CharacterCard
 from engine.player import Player
 from engine.game import Game
 import random
+import sys
+import io
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Load card templates from JSON
 raw_cards = load_cards_from_json("cards/basic_cards.json")

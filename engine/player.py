@@ -13,7 +13,7 @@ class Player:
     discard: List[Card] = field(default_factory=list)
     board: List[CharacterCard] = field(default_factory=list)
     lore: int = 0
-
+    ink_well: List[Card] = field(default_factory=list)
     ink_pool: int = 0
     used_ink: int = 0
     inked_this_turn: int = 0
@@ -48,7 +48,7 @@ class Player:
         self.hand.remove(card)
         self.ink_pool += 1
         self.inked_this_turn += 1
-        self.discard.append(card)  # Eventually move to a true ink well zone
+        self.ink_well.append(card)
         print(f"{self.name} inks {card.name}. Total ink: {self.ink_pool}")
         return True
 
