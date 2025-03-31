@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+import os
+import json
 from typing import Optional, List
 import uuid
 
@@ -32,3 +34,9 @@ class Card:
 
     def __str__(self):
         return f"{self.name}, (Cost: {self.cost}, {self.type})"
+    
+def load_cards_from_json(path: str) -> List[Card]:
+    full_path = os.path.join(os.path.dirname(__file__), "..", path)
+    with open(full_path, "r") as f:
+        card_data = json.load(f)
+    return [Card(**card) for card in card_data]

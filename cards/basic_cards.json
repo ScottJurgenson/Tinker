@@ -1,0 +1,35 @@
+[
+  {
+    "name": "Card A",
+    "cost": 1,
+    "inkable": true,
+    "type": "Character",
+    "strength": 2,
+    "willpower": 2,
+    "lore": 1,
+    "color": ["Amber"],
+    "classifications": ["Storyborn", "Ally"]
+  },
+  {
+    "name": "Card B",
+    "cost": 2,
+    "inkable": true,
+    "type": "Character",
+    "strength": 2,
+    "willpower": 2,
+    "lore": 1,
+    "color": ["Amber"],
+    "classifications": ["Storyborn", "Ally"]
+  },
+  {
+    "name": "Card C",
+    "cost": 3,
+    "inkable": true,
+    "type": "Character",
+    "strength": 2,
+    "willpower": 2,
+    "lore": 1,
+    "color": ["Amber"],
+    "classifications": ["Storyborn", "Ally"]
+  }
+]

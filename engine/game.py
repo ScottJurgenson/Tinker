@@ -14,6 +14,7 @@ class Game:
     game_over: bool = False
 
     def start_game(self):
+        print("===> Starting game...")
         self.player1.shuffle_deck()
         self.player2.shuffle_deck()
         self.player1.draw_card(7)
@@ -39,6 +40,7 @@ class Game:
 
     def ready_phase(self):
         for character in self.active_player.board:
+            character.is_dry = True
             character.exerted = False
         print(f"{self.active_player.name} readies all characters.")
 
@@ -47,13 +49,51 @@ class Game:
         print(f"{self.active_player.name} enters Set phase.")
 
     def draw_phase(self):
-        self.active_player.draw_card()
-        print(f"{self.active_player.name} draws a card.")
+        if not self.active_player.draw_card():
+            print(f"💀 {self.active_player.name} loses the game by decking out!")
+            self.game_over = True
+        else:
+            print(f"{self.active_player.name} draws a card.")
+
 
     def main_phase(self):
-        # Stub: here you'd handle inking, playing cards, questing, etc.
         print(f"{self.active_player.name} is in the Main phase.")
-        # This would eventually present choices or simulate them.
+
+        # Ink the first inkable card, if possible
+        if self.active_player.can_ink():
+            for card in self.active_player.hand:
+                if card.inkable:
+                    self.active_player.ink_card(card)
+                    break
+
+        # Play the first affordable character
+        for card in self.active_player.hand:
+            if isinstance(card, CharacterCard) and card.cost <= (self.active_player.ink_pool - self.active_player.used_ink):
+                self.active_player.play_card(card)
+                break
+
+        # Quest with all ready characters
+        for char in self.active_player.board:
+            if char.is_dry and not char.exerted:
+                char.exerted = True
+                gained = char.lore or 0
+                self.active_player.lore += gained
+                print(f"{self.active_player.name} quests with {char.name} for {gained} lore!")
+
+        print(f"{self.active_player.name}'s board: {[char.name for char in self.active_player.board]}")
+        print(f"Ink used: {self.active_player.used_ink} / {self.active_player.ink_pool}")
+        print(f"Lore: {self.active_player.lore}")
+
+        # Try to play the first character card they can afford
+        for card in self.active_player.hand:
+            if isinstance(card, CharacterCard) and card.cost <= (self.active_player.ink_pool - self.active_player.used_ink):
+                self.active_player.play_card(card)
+                break
+
+        # Print current board state
+        print(f"{self.active_player.name}'s board: {[char.name for char in self.active_player.board]}")
+        print(f"Ink used: {self.active_player.used_ink} / {self.active_player.ink_pool}")
+
 
     def end_phase(self):
         self.resolve_end_of_turn_banishments(self.active_player)

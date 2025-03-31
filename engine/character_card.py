@@ -6,6 +6,7 @@ from engine.card import Card
 class CharacterCard(Card):
     damage: int = 0
     exerted: bool = False
+    is_dry: bool = False
 
     def is_damage_banished(self) -> bool:
         return self.damage >= (self.willpower or 0)
