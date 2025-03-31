@@ -112,6 +112,20 @@ class Game:
             if isinstance(char, CharacterCard) and char.is_dry and not char.exerted:
                 actions.append({"type": "quest", "card": char})
 
+        # Challenge
+
+        for attacker in player.board:
+            if isinstance(attacker, CharacterCard) and attacker.is_dry and not attacker.exerted:
+                for defender in self.inactive_player.board:
+                    if isinstance(defender, CharacterCard):
+                        if defender.exerted or attacker.can_challenge_ready:
+                            actions.append({
+                                "type": "challenge",
+                                "attacker": attacker,
+                                "target": defender
+                            })
+
+
         # End turn is always allowed
         actions.append({"type": "end_turn"})
 
@@ -136,6 +150,29 @@ class Game:
             char.exerted = True
             player.lore += char.lore or 0
             print(f"{player.name} quests with {char.name} for {char.lore} lore!")
+
+        elif action["type"] == "challenge":
+            attacker = action["attacker"]
+            defender = action["target"]
+
+            print(f"{self.active_player.name}'s {attacker.name} challenges {self.inactive_player.name}'s {defender.name}!")
+
+            # Exert the attacker
+            attacker.exerted = True
+
+            # Deal damage to each other
+            attacker.damage += defender.strength or 0
+            defender.damage += attacker.strength or 0
+
+            print(f"  {attacker.name} takes {defender.strength} damage (Total: {attacker.damage})")
+            print(f"  {defender.name} takes {attacker.strength} damage (Total: {defender.damage})")
+
+            # Check for banishment
+            for char, owner in [(attacker, self.active_player), (defender, self.inactive_player)]:
+                if isinstance(char, CharacterCard) and char.is_damage_banished():
+                    owner.board.remove(char)
+                    owner.discard.append(char)
+                    print(f"  💥 {char.name} is banished!")
 
         elif action["type"] == "end_turn":
             self.turn_over = True
